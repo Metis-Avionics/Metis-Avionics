@@ -50,6 +50,7 @@ changed = [
     "observe_registry.py: dead subprocess helper removed, https scheme asserted before every open, S310 noqa scoped to the two audited call sites",
     "privacy: two private repositories were named and described in the first two published revisions; both entries removed, history rebuilt from the purged tree, remote deleted and recreated, recorded as D20",
     "history: main rebuilt as a single commit from the purged tree, so the two repository names appear in no object in this repository's store",
+    "history: remote force-pushed; the three superseded SHAs return Not Found and a fresh clone has one commit",
 ]
 open_questions = [
     "Who is the copyright holder of record for the umbrella MIT licence?",
@@ -382,7 +383,8 @@ severity = "high"
 title = "A published revision of this registry named and described two private repositories"
 observed_in = "Metis-Avionics/Metis-Avionics"
 evidence = [
-    "the first two published revisions of this repository, 16:42:35Z to 16:58Z on 2026-09-26, carried two entries in spec.toml [repositories.related] for repositories that are private",
+    "the first two published revisions of this repository, 16:42:35Z to 16:59:46Z on 2026-09-26, carried two entries in spec.toml [repositories.related] for repositories that are private",
+    "17 minutes elapsed between the first push of the disclosure and the force push that ended it",
     "those entries recorded owner, repository name, architectural description and path:line citations, which is a disclosure and not an observation",
     "the GitHub API reported visibility = private for both when checked at 16:56Z on 2026-09-26",
     "the repository had 0 watchers, 0 stars and 0 forks when the entries were removed",
@@ -399,4 +401,11 @@ rule this should have stated from the start: a private repository is never
 recorded, by name or by description, however technically relevant it is. Nothing
 outside this repository was consulted to justify the removal, and the private
 work itself is untouched.
+
+Verified after the fact, and the verification is the only claim worth making:
+the three superseded commit SHAs return Not Found from the GitHub API, a fresh
+clone of the remote contains one commit and 31 objects and matches zero of the
+names, the server-side code index returns 0 results for each name, and no blob in
+the local object store matches. What cannot be verified is the absence of a copy
+taken during those 17 minutes; that requires GitHub Support, not a git command.
 """
