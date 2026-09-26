@@ -1,0 +1,19 @@
+# Editor / OS
+.DS_Store
+*.swp
+
+# Python bytecode and the toolchain virtualenv (validate.py, ruff, mypy)
+__pycache__/
+*.pyc
+.venv/
+.mypy_cache/
+.ruff_cache/
+
+# Agent-local scratch (not constitution)
+.kilo/
+.agents/
+.claude/
+.cursor/
+
+# HelixDB local instance state
+.helix/

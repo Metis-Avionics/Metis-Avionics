@@ -1,0 +1,570 @@
+# Metis-Avionics/Metis-Avionics — canonical machine-readable constitution.
+#
+# This repository is the CONTROL PLANE for Mētis Avionics. It is not a product.
+# It contains no application code and no vendored subsystem.
+#
+# Authority order (highest first):
+#   1. spec.toml        — intended state, doctrine, registry of observations
+#   2. living.toml      — observed state, discrepancies, remaining work
+#   3. docs/*.md        — generated-style human projections of the two above
+#   4. AGENTS.md        — executable prompt for agents operating on this repo
+#
+# Registry entries are OBSERVATIONS, not intentions. Never edit an observation
+# to match an intention: record a discrepancy instead (see living.toml).
+#
+# Validate with: python3 scripts/validate.py
+
+spec_version = "0.1.0"
+authority = "highest"
+kind = "control_plane"
+is_product = false
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Identity
+# ─────────────────────────────────────────────────────────────────────────────
+
+[metis]
+name = "Mētis Avionics"
+slug = "Metis-Avionics"
+repository = "Metis-Avionics/Metis-Avionics"
+legal_form = "independent_lab"
+license = "MIT"
+founded = "2026-08"
+
+[metis.identity]
+type = "independent_avionics_lab"
+mission = """
+Develop open-source aerospace, avionics, simulation, intelligence and
+engineering systems, and publish the architecture that governs them.
+"""
+mission_document = "docs/mission.md"
+mission_provenance = "Adapted into docs/mission.md from the organisation statement 'The purpose of Metis Avionics' (metis.md, 2026-09-17). Adapted, not reproduced verbatim, and the original is not under version control; see remaining work R6."
+principles = [
+    "open_source",
+    "engineering_rigor",
+    "reproducibility",
+    "determinism",
+    "explicit_boundaries",
+    "adversarial_resilience",
+    "documentation_matches_reality",
+]
+
+[metis.scope]
+domains = [
+    "avionics",
+    "aerospace",
+    "guidance_navigation_control",
+    "simulation",
+    "message_and_query_runtimes",
+    "data_access_and_caching",
+    "intelligence_systems",
+    "engineering_infrastructure",
+]
+
+[metis.non_goals]
+items = [
+    "operational_aviation_authority",
+    "certification_claims",
+    "commercial_product_management",
+    "closed_source_dependency_lock_in",
+    "undocumented_proprietary_interfaces",
+    "manufactured_project_relationships",
+    "placeholder_repositories",
+]
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Safety — binding on every agent, document and publication of this org
+# ─────────────────────────────────────────────────────────────────────────────
+
+[metis.safety]
+binding = true
+statement = """
+Mētis Avionics systems are research and engineering platforms. They must never
+issue ATC clearances, command aircraft, provide separation assurance,
+autonomously direct aircraft, claim certification, or present experimental
+state as authoritative aviation state.
+"""
+provenance = "Metis-Avionics/seven README.md:8-11 (spec §21 safety boundary), adopted org-wide."
+prohibitions = [
+    "issue_atc_clearances",
+    "command_aircraft",
+    "provide_separation_assurance",
+    "autonomously_direct_aircraft",
+    "claim_certification",
+    "present_experimental_state_as_authoritative",
+]
+applies_to = ["all_repositories", "all_agent_output", "all_published_documentation"]
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Repositories
+# ─────────────────────────────────────────────────────────────────────────────
+
+[repositories]
+source_of_truth = "repositories.registry"
+registry_is = "observation"
+observations_are_not_intentions = true
+entry_must_be_verifiable = true
+verification_sources = ["github_api", "local_clone", "crates_io_api"]
+
+[repositories.policy]
+every_repository_has_scope = true
+every_repository_has_owner = true
+every_repository_has_status = true
+every_repository_has_documented_dependencies = true
+cross_repository_dependencies_must_be_explicit = true
+unverifiable_entries_go_to_unverified = true
+
+[repositories.conventions]
+spec_file = "spec.toml"
+spec_file_casing = "lowercase"
+living_file = "living.toml"
+session_file = "SESSION.md"
+handover_file = "HANDOVER.md"
+changelog_file = "CHANGELOG.md"
+agent_file = "AGENTS.md"
+markdown_is_projection = true
+toml_is_memory = true
+
+[repositories.observed]
+observed_at = "2026-09-26T00:00:00Z"
+observed_via = [
+    "gh api orgs/Metis-Avionics/repos",
+    "git rev-parse / remote -v on local clones",
+    "crates.io api /api/v1/crates/{name}",
+]
+entry_count = 7
+stale_after_days = 30
+
+# ── Registry: the seven repositories of the organisation, this one included ───
+
+[[repositories.registry]]
+name = "economic-prv"
+full_name = "Metis-Avionics/economic-prv"
+role = "economic_simulation_research"
+purpose = "Research-grade economic simulation with EKF state estimation, Monte Carlo shock simulation, and a policy engine, under a Spec-and-Go methodology."
+language = "rust"
+rust_edition = "2024"
+default_branch = "master"
+visibility = "public"
+archived = false
+pushed_at = "2026-09-25T08:38:31Z"
+local_clone = "/home/leo/prv"
+crate_count = 9
+github_license = "UNSET"
+declared_license = "MIT"
+declared_license_source = "spec.toml:6"
+spec_file = "spec.toml"
+spec_file_conforms = true
+living_file = "living.toml"
+ci = "github_actions"
+ci_workflows = ["ci.yml"]
+primary_state_consumer = "prv-cli"
+consumes = [
+    { package = "thesix", version = "0.2", source = "crates_io", resolved_in_lock = true },
+    { package = "themql-core", version = "0.1", source = "crates_io", resolved_in_lock = false },
+    { package = "themql-runtime", version = "0.1", source = "crates_io", resolved_in_lock = false, note = "spec.toml:21 declares 0.2.0, which is not published; see discrepancy D3" },
+]
+consumes_git = []
+publishes = ["prv-cache", "prv-cli", "prv-core", "prv-data", "prv-evaluation", "prv-filter", "prv-geometry", "prv-monte-carlo", "prv-policy"]
+
+[[repositories.registry]]
+name = "seven"
+full_name = "Metis-Avionics/seven"
+role = "aviation_resilience_research"
+purpose = "Experimental distributed aviation-resilience research system: independently operating nodes maintain a deterministic, provenance-aware probabilistic representation of physical state while communications degrade."
+language = "rust"
+rust_edition = "undeclared"
+default_branch = "main"
+visibility = "public"
+archived = false
+pushed_at = "2026-09-24T12:34:19Z"
+local_clone = "/home/leo/seven"
+crate_count = 9
+github_license = "UNSET"
+declared_license = "MIT"
+declared_license_source = "spec.toml:10"
+spec_file = "spec.toml"
+spec_file_conforms = true
+living_file = "living.toml"
+ci = "none"
+ci_workflows = []
+primary_state_consumer = "prv-cli"
+consumes = [
+    { package = "themql-core", version = "0.1", source = "crates_io", resolved_in_lock = true },
+    { package = "themql-estimation", version = "0.1", source = "crates_io", resolved_in_lock = true },
+    { package = "thesix", version = "=0.2.3", source = "crates_io", resolved_in_lock = true },
+    { package = "prv-monte-carlo", version = "0.2.1", source = "crates_io", resolved_in_lock = true },
+]
+consumes_git = []
+publishes = ["seven-belief", "seven-core", "seven-evidence", "seven-helix", "seven-mql", "seven-replay", "seven-sim", "seven-six"]
+
+[[repositories.registry]]
+name = "theMQL"
+full_name = "Metis-Avionics/theMQL"
+role = "message_query_runtime"
+purpose = "Native Rust message-query runtime for desktop, distributed, telemetry, analysis, AI, GNC and embedded systems. External protocols and applications are projections of the model rather than independent semantic systems."
+language = "rust"
+rust_edition = "undeclared"
+default_branch = "main"
+visibility = "public"
+archived = false
+pushed_at = "2026-09-16T17:18:17Z"
+local_clone = ""
+crate_count = 19
+github_license = "MIT"
+declared_license = "MIT"
+declared_license_source = "SPEC.toml:6"
+spec_file = "SPEC.toml"
+spec_file_conforms = false
+living_file = ""
+ci = "github_actions"
+ci_workflows = ["ci.yml"]
+primary_state_consumer = "scripts/ci_guard.py"
+consumes = []
+consumes_git = []
+publishes = ["themql-core", "themql-runtime", "themql-estimation", "themql-gnc"]
+integrations = [
+    { repository = "Metis-Avionics/theDAF", role = "background_analysis_and_data_access", authority = "integration_only", core_dependency = false, source = "SPEC.toml:99-105" },
+]
+
+[[repositories.registry]]
+name = "theSix"
+full_name = "Metis-Avionics/theSix"
+role = "cache_orchestration_primitive"
+purpose = "Policy-driven six-tier cache orchestration. Application code never selects tiers; a policy engine routes every operation and a control plane coordinates concurrent state, including single-flight population so a cache miss never triggers a stampede."
+language = "rust"
+rust_edition = "undeclared"
+default_branch = "main"
+visibility = "public"
+archived = false
+pushed_at = "2026-09-14T09:09:21Z"
+local_clone = ""
+crate_count = 1
+github_license = "MIT"
+declared_license = "MIT"
+declared_license_source = "LICENSE"
+spec_file = ""
+spec_file_conforms = false
+living_file = "living.toml"
+ci = "github_actions"
+ci_workflows = ["ci.yml"]
+primary_state_consumer = ""
+consumes = []
+consumes_git = []
+publishes = ["thesix"]
+
+[[repositories.registry]]
+name = "theDAF"
+full_name = "Metis-Avionics/theDAF"
+role = "data_access_primitive"
+purpose = "Data-access abstraction layer: a Python reference implementation plus an LLVM-backed Rust backend exposing a C-compatible ABI, separating transport, data access and authorisation concerns."
+language = "python+rust"
+rust_edition = "2021"
+default_branch = "main"
+visibility = "public"
+archived = false
+pushed_at = "2026-09-14T11:31:55Z"
+local_clone = ""
+crate_count = 9
+github_license = "MIT"
+declared_license = "MIT"
+declared_license_source = "Cargo.toml [workspace.package]"
+spec_file = ""
+spec_file_conforms = false
+living_file = ""
+ci = "github_actions"
+ci_workflows = ["ci.yml", "publish.yml"]
+primary_state_consumer = ""
+consumes = []
+consumes_git = []
+publishes = ["daf-core", "daf-repository", "daf-cache", "daf-algorithms", "daf-http", "daf-application", "daf-runtime", "daf-messaging", "daf-ffi"]
+
+[[repositories.registry]]
+name = "theLiGI"
+full_name = "Metis-Avionics/theLiGI"
+role = "graph_intelligence_system"
+purpose = "Native Rust adaptive commercial and social graph intelligence system: acquires external information and telemetry, normalises it into typed messages and graph entities, performs deterministic and learned inference, generates structured content, deploys through platform adapters, and feeds telemetry back into the knowledge system."
+language = "rust"
+rust_edition = "2021"
+default_branch = "main"
+visibility = "public"
+archived = false
+pushed_at = "2026-09-12T17:37:44Z"
+local_clone = "/home/leo/theLiGI"
+crate_count = 37
+github_license = "MIT"
+declared_license = "MIT"
+declared_license_source = "@specs/SPEC.toml:18"
+spec_file = "@specs/SPEC.toml"
+spec_file_conforms = false
+living_file = ""
+ci = "none"
+ci_workflows = []
+primary_state_consumer = ""
+consumes = [
+    { package = "themql-core", version = "path", source = "path", resolved_in_lock = true, note = "Cargo.toml:71, path dep ../theMQL; that checkout is absent on the observation host, so the build cannot resolve; see discrepancy D3" },
+    { package = "themql-message", version = "path", source = "path", resolved_in_lock = true, note = "Cargo.toml:72" },
+    { package = "themql-query", version = "path", source = "path", resolved_in_lock = true, note = "Cargo.toml:73" },
+    { package = "themql-runtime", version = "path", source = "path", resolved_in_lock = true, note = "Cargo.toml:74" },
+    { package = "themql-telemetry", version = "path", source = "path", resolved_in_lock = true, note = "Cargo.toml:75" },
+    { package = "themql-artifact", version = "path", source = "path", resolved_in_lock = true, note = "Cargo.toml:76" },
+    { package = "themql-schema", version = "path", source = "path", resolved_in_lock = true, note = "Cargo.toml:77" },
+]
+consumes_git = [
+    { repository = "RAliane-REBORN/theDAF", rev = "37d54d78f6e7d1e3baf73db4c2daa00e78266422", packages = ["daf-core", "daf-repository", "daf-cache", "daf-algorithms", "daf-http", "daf-application"], source = "Cargo.toml:79-84", note = "fork, not the org upstream; see discrepancy D4" },
+]
+publishes = []
+
+[[repositories.registry]]
+name = "Metis-Avionics"
+full_name = "Metis-Avionics/Metis-Avionics"
+role = "organisational_control_plane"
+purpose = "The constitution, the observed registry and the machine-readable state of the organisation. Holds no application code. Its only product is a truthful answer to the question of what this organisation currently is."
+language = "python"
+default_branch = "main"
+visibility = "public"
+archived = false
+pushed_at = "2026-09-26T16:42:40Z"
+local_clone = "/home/leo/Desktop/Metis-Avionics"
+crate_count = 0
+github_license = "MIT"
+declared_license = "MIT"
+declared_license_source = "LICENSE:3"
+spec_file = "spec.toml"
+spec_file_conforms = true
+living_file = "living.toml"
+ci = "github_actions"
+ci_workflows = [".github/workflows/validate.yml"]
+primary_state_consumer = ""
+consumes = []
+consumes_git = []
+publishes = []
+note = "Created 2026-09-26, after the other six were already registered. The observer flagged its own absence from the registry on its first run after publication; the entry was added in the same change that created the remote, not later."
+
+# ── Related repositories: outside the org, edges still explicit ──────────────
+
+[[repositories.related]]
+name = "theDAF"
+full_name = "RAliane-REBORN/theDAF"
+in_org = false
+relationship = "fork_source"
+direction = "consumed_by_org"
+asserted_by = "Metis-Avionics/theLiGI Cargo.toml:79-84"
+relationship_confidence = "asserted_by_consumer"
+note = "Pinned by theLiGI at rev 37d54d7. The org upstream Metis-Avionics/theDAF has no crates.io publication, so this edge is revision-pinned only. Six of the nine crate names match the upstream in-tree workspace."
+
+[[repositories.related]]
+name = "theMQL"
+full_name = "RAliane-REBORN/theMQL"
+in_org = false
+relationship = "fork_source"
+direction = "consumed_by_org"
+asserted_by = "Metis-Avionics/seven specs/decisions/0003-themql-sourcing.md:5-8"
+relationship_confidence = "asserted_by_consumer"
+note = "Cargo git checkout present at 64a6923. seven decision 0003 concluded the org upstream is published on crates.io and chose crates.io consumption instead; this fork is therefore superseded for the seven build."
+
+[repositories.excluded]
+note = """
+Considered and excluded from the registry. A repository is also excluded when it
+is private: recording the existence, ownership or shape of somebody's private
+work in a public registry is a disclosure, whatever the technical merit.
+"""
+items = [
+    { full_name = "RAliane-REBORN/photon-fde-interview-prep", reason = "Interview preparation material, not an engineering system in the org's scope." },
+]
+
+# ── Published artefacts (crates.io), observed 2026-09-26 ─────────────────────
+
+[repositories.publications]
+observed_at = "2026-09-26T00:00:00Z"
+source = "crates.io api /api/v1/crates/{name}"
+note = "Every package the organisation publishes, verified against the crates.io index on the observation date. A package absent from this table is either unpublished or was not checked."
+
+# theMQL — message and query runtime primitives
+themql-core = { max_version = "0.1.0", version_count = 1, owner_repo = "Metis-Avionics/theMQL" }
+themql-runtime = { max_version = "0.1.0", version_count = 1, owner_repo = "Metis-Avionics/theMQL" }
+themql-estimation = { max_version = "0.1.0", version_count = 1, owner_repo = "Metis-Avionics/theMQL" }
+themql-gnc = { max_version = "0.1.0", version_count = 1, owner_repo = "Metis-Avionics/theMQL" }
+
+# theSix — cache orchestration
+thesix = { max_version = "0.2.3", version_count = 4, owner_repo = "Metis-Avionics/theSix" }
+
+# economic-prv — simulation
+prv-cache = { max_version = "0.2.1", version_count = 2, owner_repo = "Metis-Avionics/economic-prv" }
+prv-cli = { max_version = "0.2.1", version_count = 3, owner_repo = "Metis-Avionics/economic-prv" }
+prv-core = { max_version = "0.2.1", version_count = 3, owner_repo = "Metis-Avionics/economic-prv" }
+prv-data = { max_version = "0.2.1", version_count = 3, owner_repo = "Metis-Avionics/economic-prv" }
+prv-evaluation = { max_version = "0.2.1", version_count = 3, owner_repo = "Metis-Avionics/economic-prv" }
+prv-filter = { max_version = "0.2.1", version_count = 3, owner_repo = "Metis-Avionics/economic-prv" }
+prv-geometry = { max_version = "0.2.1", version_count = 3, owner_repo = "Metis-Avionics/economic-prv" }
+prv-monte-carlo = { max_version = "0.2.1", version_count = 3, owner_repo = "Metis-Avionics/economic-prv" }
+prv-policy = { max_version = "0.2.1", version_count = 3, owner_repo = "Metis-Avionics/economic-prv" }
+
+# seven — aviation resilience research
+seven-belief = { max_version = "0.1.0", version_count = 1, owner_repo = "Metis-Avionics/seven" }
+seven-core = { max_version = "0.1.0", version_count = 1, owner_repo = "Metis-Avionics/seven" }
+seven-evidence = { max_version = "0.1.0", version_count = 1, owner_repo = "Metis-Avionics/seven" }
+seven-helix = { max_version = "0.1.0", version_count = 1, owner_repo = "Metis-Avionics/seven" }
+seven-mql = { max_version = "0.1.0", version_count = 1, owner_repo = "Metis-Avionics/seven" }
+seven-replay = { max_version = "0.1.0", version_count = 1, owner_repo = "Metis-Avionics/seven" }
+seven-sim = { max_version = "0.1.0", version_count = 1, owner_repo = "Metis-Avionics/seven" }
+seven-six = { max_version = "0.1.0", version_count = 1, owner_repo = "Metis-Avionics/seven" }
+
+# theDAF — data access, including the C-compatible ABI surface
+daf-core = { max_version = "0.1.0", version_count = 1, owner_repo = "Metis-Avionics/theDAF" }
+daf-repository = { max_version = "0.1.0", version_count = 1, owner_repo = "Metis-Avionics/theDAF" }
+daf-cache = { max_version = "0.1.0", version_count = 1, owner_repo = "Metis-Avionics/theDAF" }
+daf-algorithms = { max_version = "0.1.0", version_count = 1, owner_repo = "Metis-Avionics/theDAF" }
+daf-http = { max_version = "0.1.0", version_count = 1, owner_repo = "Metis-Avionics/theDAF" }
+daf-application = { max_version = "0.1.0", version_count = 1, owner_repo = "Metis-Avionics/theDAF" }
+daf-runtime = { max_version = "0.1.0", version_count = 1, owner_repo = "Metis-Avionics/theDAF" }
+daf-messaging = { max_version = "0.1.0", version_count = 1, owner_repo = "Metis-Avionics/theDAF" }
+daf-ffi = { max_version = "0.1.0", version_count = 1, owner_repo = "Metis-Avionics/theDAF" }
+
+[repositories.publications.unpublished]
+items = ["seven-bin", "theligi-core"]
+note = "Absent from the crates.io index at the observation date. seven-bin is a workspace binary; theLiGI's theligi-* packages are unpublishable in practice, so theLiGI is consumable only as a git dependency."
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Engineering doctrine
+# ─────────────────────────────────────────────────────────────────────────────
+
+[engineering]
+spec_first = true
+deterministic = true
+reproducible = true
+test_first = true
+automation_preferred = true
+bounded_agent_execution = true
+state_toml_is_memory = true
+markdown_is_projection = true
+verification_beats_assertion = true
+
+[engineering.rust]
+preferred = true
+edition = "2024"
+edition_adoption = "target"
+edition_conforming = ["economic-prv"]
+resolver = "3"
+minimum_supported_rust = "1.98"
+minimum_supported_rust_adoption = "declared_target"
+
+[engineering.power_of_ten]
+mandatory_for_safety_critical = true
+present_in = ["economic-prv", "theLiGI", "theMQL", "theDAF"]
+checker = "economic-prv scripts/tetanus-check.py"
+thresholds = "economic-prv tetanus.toml [thresholds]"
+
+[engineering.quality_gates]
+org_level_enforcement = "per_repository"
+note = "This repository does not claim to enforce the gates of other repositories. It records that they exist, and that they are absent where ci = \"none\". Its own gates are recorded here too: an organisation that does not hold itself to its doctrine has no doctrine."
+observed_gates = [
+    { repository = "Metis-Avionics", gate = "python3 scripts/validate.py", kind = "schema_conformance" },
+    { repository = "Metis-Avionics", gate = "uv run ruff check scripts/", kind = "lint" },
+    { repository = "Metis-Avionics", gate = "uv run ruff format --check scripts/", kind = "format" },
+    { repository = "Metis-Avionics", gate = "uv run mypy", kind = "types" },
+    { repository = "economic-prv", gate = "scripts/tetanus-check.py", kind = "static_analysis" },
+    { repository = "economic-prv", gate = "scripts/check_no_coarse_locks.sh", kind = "static_analysis" },
+    { repository = "economic-prv", gate = "scripts/check_schema.sh", kind = "schema_conformance" },
+    { repository = "economic-prv", gate = "cargo deny", kind = "supply_chain" },
+    { repository = "economic-prv", gate = "cargo machete", kind = "unused_dependency" },
+    { repository = "seven", gate = "cargo nextest --workspace", kind = "test" },
+    { repository = "seven", gate = "cargo clippy --workspace --all-targets -- -D warnings", kind = "lint" },
+    { repository = "theMQL", gate = "scripts/ci_guard.py", kind = "static_analysis" },
+    { repository = "theLiGI", gate = "none", kind = "none" },
+    { repository = "seven", gate = "none", kind = "none" },
+]
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Governance
+# ─────────────────────────────────────────────────────────────────────────────
+
+[governance]
+changes_require_explicit_scope = true
+architecture_changes_require_spec_update = true
+breaking_changes_require_migration_plan = true
+documentation_must_reflect_implementation = true
+disagreements_are_recorded_not_overwritten = true
+discrepancy_protocol = "docs/governance.md"
+
+[governance.change_classes]
+doctrine = "spec.toml sections other than repositories.registry; requires a CHANGELOG entry and a rationale."
+registry = "repositories.registry and repositories.related entries; requires re-observation evidence, never invention."
+discrepancy = "living.toml [[discrepancies]] entries; the only permitted way to record a spec/implementation mismatch."
+
+[governance.repository_requirements]
+license_required = true
+ci_required = true
+spec_file_required = true
+living_state_required = true
+agent_file_required = true
+power_of_ten_required_for_safety_critical = true
+requirements_enforced_in = "other repositories; recorded here, gaps tracked as discrepancies"
+
+[governance.dependencies]
+cross_repository_dependencies_must_be_explicit = true
+prefer_crates_io_over_fork = true
+forks_must_be_declared = true
+revisions_must_be_pinned = true
+unpinned_git_dependencies_prohibited = true
+note = "seven decision 0003 is the reference implementation of this policy: prefer the org's published crates over a fork checkout, and let Cargo.lock checksums carry reproducibility."
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Agent execution model
+# ─────────────────────────────────────────────────────────────────────────────
+
+[agent]
+mode = "bounded_executor"
+prompt = "AGENTS.md"
+read_spec_first = true
+may_modify_other_repositories = false
+
+[agent.rules]
+read_spec_first = true
+inspect_before_modify = true
+no_requirement_invention = true
+no_scope_expansion = true
+no_repository_invention = true
+no_observation_editing = true
+observations_are_not_intentions = true
+validate_before_completion = true
+never_hide_failures = true
+never_claim_unvalidated_state = true
+update_state_after_execution = true
+record_discrepancies_explicitly = true
+respect_safety_boundary = true
+
+[agent.execution_model]
+stages = ["parse", "normalize", "resolve", "execute", "validate", "ratchet"]
+
+[agent.final_report]
+fields = ["status", "specification", "state_change", "files", "validation", "remaining", "discrepancies"]
+status_values = ["COMPLETE", "PARTIAL", "BLOCKED"]
+
+# ─────────────────────────────────────────────────────────────────────────────
+# State
+# ─────────────────────────────────────────────────────────────────────────────
+
+[state]
+authoritative_spec = "spec.toml"
+living_state = "living.toml"
+session_state = "SESSION.md"
+handover_state = "HANDOVER.md"
+history = "CHANGELOG.md"
+registry_schema = "schemas/repository.schema.toml"
+validator = "scripts/validate.py"
+docs_index = "docs/architecture.md"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Ratchet
+# ─────────────────────────────────────────────────────────────────────────────
+
+[ratchet]
+enabled = true
+adoption = "declared"
+enforcement = "scripts/validate.py covers org-level consistency only; per-repository gates are enforced in those repositories."
+scope_expansion = false
+completed_work_reopens = false
+remaining_work_only_decreases = true
+observations_never_edited_to_match_intent = true
+registry_requires_re_observation = true

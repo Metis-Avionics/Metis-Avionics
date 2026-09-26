@@ -1,0 +1,402 @@
+# Living state for Metis-Avionics/Metis-Avionics.
+#
+# spec.toml says what the organisation intends and what has been observed.
+# living.toml says what is actually true right now, what was verified, what
+# remains, and every known disagreement between the two.
+#
+# Validate with: python3 scripts/validate.py
+
+[handover]
+status = "published"
+phase = "constitution_published_and_gated"
+last_updated = "2026-09-26T00:00:00Z"
+agent = "opencode"
+summary = """
+Constitution for the Mētis Avionics control plane, published. spec.toml records
+the organisation's identity, safety boundary, engineering doctrine, governance
+rules, and a registry of all seven Metis-Avionics repositories — the six
+members plus this control plane — and two explicitly related public fork
+sources, every field verified on 2026-09-26. 20 discrepancies between
+specification, implementation and recorded state are registered below. None of
+them is fixed by this repository. The two programs in scripts/ are held to
+pinned ruff and mypy gates that run on every push.
+"""
+next_action = """
+File the high-severity discrepancies as issues in the repositories that own
+them. Re-observe the registry before 2026-10-26, when the 30-day staleness
+window expires and check C10 begins to fail. Confirm the copyright holder of
+record: the published LICENSE names the organisation, not a person.
+"""
+known_failures = []
+validated = [
+    "python3 scripts/validate.py: 0 errors, 11 warnings, all warnings waived findings",
+    "python3 scripts/validate.py --strict: 11 errors, every waived gap re-raised",
+    "python3 scripts/observe_registry.py: 7 repositories observed, no registry drift beyond D5, no publication drift across all 32 packages",
+    "python3 scripts/observe_registry.py --stale: 0 days old, fresh",
+    "uv run ruff check scripts/: clean",
+    "uv run ruff format --check scripts/: clean",
+    "uv run mypy: clean under --strict, python_version 3.11",
+    "every discrepancy carries path:line or command evidence",
+    "all three TOML files parse under tomllib",
+]
+changed = [
+    "bootstrap: no prior state existed; this is the initial record",
+    "published: commit 769ce20 pushed to github.com/Metis-Avionics/Metis-Avionics, public, default branch main (R5 closed)",
+    "registry: added Metis-Avionics/Metis-Avionics as the seventh entry, because the organisation now contains it and observe_registry.py reported its absence",
+    "toolchain: pyproject.toml, uv.lock, and pinned ruff 0.16.9 plus mypy 2.3.1; ruff check, ruff format --check and mypy --strict all clean",
+    "C1: a scalar where the schema declares a table is now a finding rather than being passed to require_keys",
+    "typed accessors as_table and as_keys added so the validator navigates TOML without falling back to Any",
+    "CI: actions moved to checkout@v7 and setup-python@v7 after the first run annotated Node 20 deprecations; setup-uv@v10 added; a gates job and a lockfile-tracked check added",
+    "observe_registry.py: dead subprocess helper removed, https scheme asserted before every open, S310 noqa scoped to the two audited call sites",
+    "privacy: two private repositories were named and described in the first two published revisions; both entries removed, history rebuilt from the purged tree, remote deleted and recreated, recorded as D20",
+    "history: main rebuilt as a single commit from the purged tree, so the two repository names appear in no object in this repository's store",
+]
+open_questions = [
+    "Who is the copyright holder of record for the umbrella MIT licence?",
+    "Should the specification-filename divergence (D7) be resolved by renaming, or by amending the org convention?",
+    "Should this repository file issues in the repositories it observes, or only record them?",
+]
+
+[[handover.remaining]]
+id = "R1"
+task = "Confirm the copyright holder of record. The LICENSE is published and names the organisation, Copyright (c) 2026 Mētis Avionics. If a natural person or legal entity must be named instead, that is a licence change, not a documentation fix."
+blocking = true
+
+[[handover.remaining]]
+id = "R2"
+task = "Re-run scripts/observe_registry.py before 2026-10-26. It ran once on 2026-09-26 and found no publication drift across all 32 packages, so the remaining work is the 30-day window expiring, not an unresolved mismatch."
+blocking = false
+
+[[handover.remaining]]
+id = "R3"
+task = "File D1, D2, D3 and D4 as issues in economic-prv, theLiGI and theDAF. This repository records them; it cannot fix them."
+blocking = false
+
+[[handover.remaining]]
+id = "R4"
+task = "Decide whether economic-prv and seven get a LICENSE file (D5). Until then their code is not in fact MIT-licensed despite both specs claiming MIT."
+blocking = false
+
+[[handover.remaining]]
+id = "R6"
+task = "Decide whether the founding organisation statement (currently only at ~/Desktop/metis.md, outside version control) should be committed into this repository. docs/mission.md is an adaptation of it; the original is not under any repository and is not cited to a path that resolves."
+blocking = false
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Discrepancies — the only permitted way to record a mismatch between
+# specification, state and implementation. Never resolve one by editing an
+# observation. Never resolve one by deleting it.
+# ─────────────────────────────────────────────────────────────────────────────
+
+[[discrepancies]]
+id = "D1"
+severity = "high"
+title = "economic-prv declares theMQL as a required dependency, but theMQL is not in its build graph"
+observed_in = "Metis-Avionics/economic-prv"
+evidence = [
+    "spec.toml:18-25 declares [dependencies.theMQL] with required = true",
+    "Cargo.toml:22,40-41 declare themql-core and themql-runtime under [workspace.dependencies], not [dependencies]",
+    "no member crate manifest references themql (grep over crates/*/Cargo.toml returns nothing)",
+    "Cargo.lock contains no package named themql-core or themql-runtime; thesix is present",
+    "crates/cli/src/main.rs:385 mentions themql-runtime only inside a help string",
+]
+status = "accepted"
+resolution_owner = "Metis-Avionics/economic-prv"
+resolution = "Either consume theMQL for real (a member crate inherits the workspace dependency and Cargo.lock records themql-core 0.1.0) or delete the declaration from spec.toml:18-25. Verify with cargo tree -i themql-core."
+
+[[discrepancies]]
+id = "D2"
+severity = "high"
+title = "economic-prv specifies a theMQL version that has never been published"
+observed_in = "Metis-Avionics/economic-prv"
+evidence = [
+    "spec.toml:21 declares version = \"0.2.0\" for themql-runtime",
+    "Cargo.toml:41 declares version = \"0.1\" for the same crate",
+    "crates.io API for themql-runtime reports max_version 0.1.0 with 1 version (observed 2026-09-26)",
+]
+status = "accepted"
+resolution_owner = "Metis-Avionics/economic-prv"
+resolution = "Align spec.toml:21 with the published 0.1.0 and with Cargo.toml:41, or publish themql-runtime 0.2.0 first. Do not leave a spec pointing at a version that cannot be resolved."
+
+[[discrepancies]]
+id = "D3"
+severity = "high"
+title = "theLiGI's theMQL path dependencies cannot resolve on this host"
+observed_in = "Metis-Avionics/theLiGI"
+evidence = [
+    "Cargo.toml:71-77 declares seven themql-* crates as path = \"../theMQL/crates/...\"",
+    "per-crate manifests repeat the path: crates/core/Cargo.toml:14, crates/schema/Cargo.toml:14, crates/message/Cargo.toml:17, crates/query/Cargo.toml:16, crates/runtime/Cargo.toml:18, crates/telemetry/Cargo.toml:18, crates/artifact/Cargo.toml:17",
+    "Cargo.lock:2133-2190 records themql-* with no source field, i.e. path dependencies",
+    "/home/leo/theMQL does not exist on this host",
+    "not confirmed by cargo metadata; the investigation was read-only",
+]
+status = "open"
+resolution_owner = "Metis-Avionics/theLiGI"
+resolution = "Run cargo metadata in theLiGI to confirm, then either vendor theMQL, switch to the published crates.io themql-* 0.1 packages, or remove the path dependencies."
+
+[[discrepancies]]
+id = "D4"
+severity = "high"
+title = "theLiGI consumes theDAF from a personal fork although theDAF publishes all nine of its crates"
+observed_in = "Metis-Avionics/theLiGI"
+evidence = [
+    "Cargo.toml:79-84 pins six daf-* crates to git RAliane-REBORN/theDAF at rev 37d54d78f6e7d1e3baf73db4c2daa00e78266422",
+    "all nine theDAF Rust crates are published on crates.io at 0.1.0: daf-core, daf-repository, daf-cache, daf-algorithms, daf-http, daf-application, daf-runtime, daf-messaging, daf-ffi (observed 2026-09-26)",
+    "theLiGI therefore bypasses published upstream versions in favour of a fork revision",
+    "the edge carries no version-level constraint, so divergence between the fork and the org upstream is undetectable at build time",
+    "the pinned fork's six crate names are a subset of the upstream's nine",
+]
+status = "accepted"
+resolution_owner = "Metis-Avionics/theLiGI and Metis-Avionics/theDAF"
+resolution = "Consume the published daf-* 0.1.0 packages, or record in theLiGI why the fork is authoritative and what would make divergence from the org deliberate. spec.toml governance.dependencies already prefers org publication over forks."
+
+[[discrepancies]]
+id = "D5"
+severity = "high"
+title = "economic-prv and seven declare MIT but ship no LICENSE file"
+observed_in = "Metis-Avionics (org)"
+evidence = [
+    "economic-prv spec.toml:6 declares license = \"MIT\"",
+    "seven spec.toml:10 declares license = \"MIT\"",
+    "no LICENSE file exists in either working tree",
+    "the GitHub API reports licenseInfo = null for both repositories",
+]
+status = "accepted"
+check = "C12"
+waiver_key = "no LICENSE file"
+resolution_owner = "Metis-Avionics/economic-prv and Metis-Avionics/seven"
+resolution = "Add an MIT LICENSE file, or correct the declared license. Until one of those happens the code is not in fact MIT-licensed, which contradicts the open_source principle in spec.toml."
+
+[[discrepancies]]
+id = "D6"
+severity = "medium"
+title = "The spec status field is not maintained anywhere in the organisation"
+observed_in = "Metis-Avionics (org)"
+evidence = [
+    "seven/spec.toml:8 status = \"greenfield\" while seven/living.toml:6 phase = \"phase_8_core_complete\" and nine crates are published",
+    "theMQL SPEC.toml:8 status = \"greenfield\" while nineteen crates are published to crates.io",
+    "theLiGI @specs/SPEC.toml:11 status = \"experimental\"",
+    "economic-prv spec.toml has no status field at all",
+    "spec.toml repositories.policy every_repository_has_status = true is therefore unsatisfiable as written",
+]
+status = "open"
+resolution_owner = "Metis-Avionics (org)"
+resolution = "Either drop status from specifications and make living.toml the single status source, or mandate the field and fix all four repositories. Pick one; do not leave both claiming authority."
+
+[[discrepancies]]
+id = "D7"
+severity = "medium"
+title = "Specification filename and casing diverge from the org convention"
+observed_in = "Metis-Avionics (org)"
+evidence = [
+    "the org convention in spec.toml [repositories.conventions] is spec.toml, lowercase, matching economic-prv and seven",
+    "theMQL uses SPEC.toml, uppercase",
+    "theLiGI uses @specs/SPEC.toml, uppercase, in an at-prefixed directory",
+    "theSix and theDAF have no specification file at all",
+]
+status = "accepted"
+check = "C5"
+waiver_key = "specification file"
+resolution_owner = "Metis-Avionics/theMQL, Metis-Avionics/theLiGI, Metis-Avionics/theSix, Metis-Avionics/theDAF"
+resolution = "Rename to spec.toml, or amend the org convention to permit the variants. No migration is scheduled from this repository; the divergence is recorded, not enforced away."
+
+[[discrepancies]]
+id = "D8"
+severity = "medium"
+title = "seven and theLiGI have no continuous integration"
+observed_in = "Metis-Avionics/seven, Metis-Avionics/theLiGI"
+evidence = [
+    "the GitHub API returns 404 Not Found for repos/Metis-Avionics/seven/contents/.github",
+    "no .github directory exists in the seven working tree",
+    "no .github directory exists in the theLiGI working tree",
+    "theLiGI documents its gates in AGENTS.md:37-44 but nothing enforces them",
+    "the other four org repositories all have ci.yml",
+]
+status = "accepted"
+check = "C13"
+waiver_key = "continuous integration"
+resolution_owner = "Metis-Avionics/seven and Metis-Avionics/theLiGI"
+resolution = "Add a workflow running the gates each repository already documents. A documented gate that nothing runs is a claim, not a control."
+
+[[discrepancies]]
+id = "D9"
+severity = "medium"
+title = "theMQL, theLiGI and theDAF have no living state"
+observed_in = "Metis-Avionics (org)"
+evidence = [
+    "theMQL, theLiGI and theDAF have living_file recorded as empty in the spec.toml registry",
+    "theMQL has SESSION.md, HANDOVER.md and CHANGELOG.md but no living.toml",
+    "theLiGI has SESSION.md, HANDOVER.md, CHANGELOG.md and TETANUS.md but no living.toml",
+    "theDAF has SESSION.md, HANDOVER.md and CHANGELOG.md but no living.toml",
+    "economic-prv, seven and theSix do have living.toml",
+]
+status = "accepted"
+check = "C13"
+waiver_key = "no living state"
+resolution_owner = "Metis-Avionics/theMQL, Metis-Avionics/theLiGI, Metis-Avionics/theDAF"
+resolution = "Adopt living.toml in all three, or amend governance.repository_requirements.living_state_required. Hand-maintained session files satisfy the intent; the divergence must still be declared one way or the other. Waived rather than left failing so that the requirement stays stated as the target, with --strict available to enforce it today."
+
+[[discrepancies]]
+id = "D10"
+severity = "medium"
+title = "theLiGI's TETANUS.md cites a specification key that does not exist"
+observed_in = "Metis-Avionics/theLiGI"
+evidence = [
+    "TETANUS.md:10 cites `SPEC.toml [safety] safety_critical_paths_explicit = true` as enforcing the rules",
+    "@specs/SPEC.toml has no [safety] table; grep for safety_critical_paths_explicit returns no match",
+]
+status = "open"
+resolution_owner = "Metis-Avionics/theLiGI"
+resolution = "Add the [safety] table theLiGI actually enforces, or correct TETANUS.md:10. A safety document that cites a nonexistent control is worse than one that cites none."
+
+[[discrepancies]]
+id = "D11"
+severity = "medium"
+title = "Cross-repository pin policy is applied inconsistently"
+observed_in = "Metis-Avionics (org)"
+evidence = [
+    "seven/Cargo.toml:44 exact-pins thesix = \"=0.2.3\"",
+    "economic-prv/Cargo.toml:39 allows the floating range thesix = \"0.2\"",
+    "seven/specs/decisions/0003-themql-sourcing.md:16-19 states that crates.io plus Cargo.lock checksums is the standard Mētis reproducibility pattern",
+]
+status = "open"
+resolution_owner = "Metis-Avionics/economic-prv"
+resolution = "Pin org primitives exactly in every consumer, or record in economic-prv's spec why it accepts a floating range. A primitive that can drift under a consumer is not a primitive."
+
+[[discrepancies]]
+id = "D12"
+severity = "low"
+title = "theLiGI's recorded session state is stale"
+observed_in = "Metis-Avionics/theLiGI"
+evidence = [
+    "SESSION.md:11 records the branch head at 5087790",
+    "HANDOVER.md:10 records the branch head at 5087790",
+    "the actual HEAD at observation time is ddd38f0, 2026-09-12, 'docs: update living docs after PR #4 main reconciliation'",
+]
+status = "open"
+resolution_owner = "Metis-Avionics/theLiGI"
+resolution = "Refresh SESSION.md and HANDOVER.md, or generate them from state as economic-prv does."
+
+[[discrepancies]]
+id = "D13"
+severity = "low"
+title = "theLiGI's README points at a directory that does not exist"
+observed_in = "Metis-Avionics/theLiGI"
+evidence = [
+    "README.md:51 lists specs/SUBSYSTEM.toml as an authoritative artefact",
+    "the directory is @specs/; README.md:46 and README.md:55 use the correct path",
+]
+status = "open"
+resolution_owner = "Metis-Avionics/theLiGI"
+resolution = "Fix README.md:51."
+
+[[discrepancies]]
+id = "D14"
+severity = "low"
+title = "theDAF has an agent synchronisation file but no agent contract"
+observed_in = "Metis-Avionics/theDAF"
+evidence = [
+    "theDAF's repository root contains AGENTS_SYNC.md",
+    "theDAF's repository root has no AGENTS.md",
+    "all five other org repositories have an AGENTS.md",
+]
+status = "open"
+resolution_owner = "Metis-Avionics/theDAF"
+resolution = "Add AGENTS.md, or record that theDAF is deliberately run without a repository-level agent contract."
+
+[[discrepancies]]
+id = "D15"
+severity = "low"
+title = "theDAF's README documents a repository that does not exist, while the backend now lives in-tree"
+observed_in = "Metis-Avionics/theDAF"
+evidence = [
+    "README.md:3 and README.md:41-50 document theDAF-LLVM as a separate repository with its own crate family and crate map",
+    "https://github.com/Metis-Avionics/theDAF-LLVM does not resolve; gh reports 'Could not resolve to a Repository'",
+    "theDAF's own Cargo.toml:3-12 now lists nine in-tree daf-* members including daf-ffi, which matches the documented C-compatible ABI",
+]
+status = "open"
+resolution_owner = "Metis-Avionics/theDAF"
+resolution = "Rewrite the README to describe the in-tree backend, or restore the separate repository. As written, the README's primary architectural claim points at nothing."
+
+[[discrepancies]]
+id = "D16"
+severity = "low"
+title = "The Rust 2024 edition target is not met organisation-wide"
+observed_in = "Metis-Avionics (org)"
+evidence = [
+    "spec.toml [engineering.rust] sets edition = \"2024\" with edition_adoption = \"target\"",
+    "theLiGI/Cargo.toml:43-46 declares edition = \"2021\" and rust-version = \"1.75\"",
+    "theDAF's Cargo.toml [workspace.package] declares edition = \"2021\"",
+    "seven/Cargo.toml declares neither edition nor rust-version; it is a virtual manifest on resolver 3",
+]
+status = "open"
+resolution_owner = "Metis-Avionics (org)"
+resolution = "Migrate the three lagging repositories, or restate the edition as advisory so the spec stops asserting something false."
+
+[[discrepancies]]
+id = "D17"
+severity = "low"
+title = "Registry entries are a dated snapshot, not live state"
+observed_in = "Metis-Avionics/Metis-Avionics"
+evidence = [
+    "spec.toml [repositories.observed] records observed_at 2026-09-26 via the GitHub API, local clones and the crates.io API",
+    "stale_after_days is 30, after which check C10 warns",
+    "three of the six member repositories are not cloned on the observation host, so their entries are remote-only",
+]
+status = "accepted"
+check = "C10"
+waiver_key = "observations are"
+resolution_owner = "Metis-Avionics/Metis-Avionics"
+resolution = "Re-observe with scripts/observe_registry.py before acting on registry data older than stale_after_days. Never hand-edit an observation to make it fresh."
+
+[[discrepancies]]
+id = "D18"
+severity = "low"
+title = "Build artefacts and scratch files are committed in two repositories"
+observed_in = "Metis-Avionics (org)"
+evidence = [
+    "economic-prv tracks scripts/__pycache__/tetanus-check.cpython-314.pyc, and the working tree shows it as modified",
+    "theSix commits a test.txt at repository root",
+]
+status = "open"
+resolution_owner = "Metis-Avionics/economic-prv and Metis-Avionics/theSix"
+resolution = "Remove the artefacts from version control and ignore them. Compiled bytecode in a repository is a supply-chain surface, not a convenience."
+
+[[discrepancies]]
+id = "D19"
+severity = "low"
+title = "Default branch naming is inconsistent across the organisation"
+observed_in = "Metis-Avionics (org)"
+evidence = [
+    "economic-prv's default branch is master",
+    "theMQL, theSix, theDAF, seven and theLiGI all default to main",
+    "economic-prv/.github/workflows/ci.yml triggers on both master and main, which is a workaround for the same inconsistency",
+]
+status = "open"
+resolution_owner = "Metis-Avionics (org)"
+resolution = "Converge on one default branch name, or record that per-repository divergence is accepted."
+
+[[discrepancies]]
+id = "D20"
+severity = "high"
+title = "A published revision of this registry named and described two private repositories"
+observed_in = "Metis-Avionics/Metis-Avionics"
+evidence = [
+    "the first two published revisions of this repository, 16:42:35Z to 16:58Z on 2026-09-26, carried two entries in spec.toml [repositories.related] for repositories that are private",
+    "those entries recorded owner, repository name, architectural description and path:line citations, which is a disclosure and not an observation",
+    "the GitHub API reported visibility = private for both when checked at 16:56Z on 2026-09-26",
+    "the repository had 0 watchers, 0 stars and 0 forks when the entries were removed",
+]
+status = "accepted"
+resolution_owner = "Metis-Avionics/Metis-Avionics"
+resolution = """
+Both entries were removed from spec.toml, docs/repositories.md and
+docs/engineering.md. The local history was rebuilt from the purged tree rather
+than filtered, so the strings survive in no reachable commit and no dangling
+object, and the GitHub repository was deleted and recreated so that no ref,
+object, or rendered view retains them. [repositories.excluded] now states the
+rule this should have stated from the start: a private repository is never
+recorded, by name or by description, however technically relevant it is. Nothing
+outside this repository was consulted to justify the removal, and the private
+work itself is untouched.
+"""

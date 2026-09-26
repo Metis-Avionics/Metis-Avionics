@@ -1,0 +1,119 @@
+name: New repository proposal
+description: Propose adding a repository to the Mētis Avionics organisation
+labels: ["registry", "needs-verification"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **No repository enters the registry without a verified remote.** If you
+        cannot verify the remote exists, this repository is not part of the
+        organisation yet, and the proposal is a question rather than a change.
+
+        Do not create a placeholder repository to make the registry look
+        complete. An empty registry entry is worse than an absent one.
+
+  - type: input
+    id: full_name
+    attributes:
+      label: Full repository name
+      description: owner/name, exactly as GitHub reports it.
+      placeholder: Metis-Avionics/example
+    validations:
+      required: true
+
+  - type: dropdown
+    id: remote_verified
+    attributes:
+      label: Have you run `gh repo view <owner>/<name>` and seen it succeed?
+      options:
+        - "Yes — it exists and I can see it"
+        - "No — I have not verified it"
+    validations:
+      required: true
+
+  - type: input
+    id: remote_output
+    attributes:
+      label: Output of the verification command
+      render: shell
+      description: >-
+        Paste the relevant lines. If you have not run it, say so — that is a
+        valid answer and it changes what happens next.
+    validations:
+      required: true
+
+  - type: textarea
+    id: purpose
+    attributes:
+      label: What is it for?
+      description: >-
+        One or two sentences, in the repository's own words, cited to its
+        README. Not your impression of it.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: relationship
+    attributes:
+      label: How does it relate to the existing repositories?
+      options:
+        - "A new system — no edge to anything existing"
+        - "It depends on one or more existing repositories"
+        - "Existing repositories depend on it"
+        - "It shares a primitive or a contract with an existing repository"
+    validations:
+      required: true
+
+  - type: textarea
+    id: edges
+    attributes:
+      label: If it has edges, cite them
+      description: >-
+        For each edge, give the file and line that asserts it: a Cargo.toml line,
+        a spec table, a decision record. "It uses theMQL" is not an edge; a
+        `Cargo.toml` line is.
+      render: toml
+    validations:
+      required: false
+
+  - type: dropdown
+    id: licence
+    attributes:
+      label: Licence
+      options:
+        - "MIT, with a LICENSE file in the repository"
+        - "MIT declared in the spec but no LICENSE file"
+        - "Another licence"
+        - "No licence decision yet"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: governance_files
+    attributes:
+      label: Which governance files does it have?
+      options:
+        - "spec.toml, living.toml, SESSION.md, HANDOVER.md, CHANGELOG.md, AGENTS.md"
+        - "Some of them"
+        - "None of them"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: ci
+    attributes:
+      label: Does it have continuous integration?
+      options:
+        - "Yes — a workflow runs its quality gates"
+        - "It documents gates but nothing runs them"
+        - "No"
+    validations:
+      required: true
+
+  - type: textarea
+    id: open_questions
+    attributes:
+      label: What do you not know?
+      description: >-
+        Fields you could not verify, relationships you are guessing at, and
+        anything you would rather state as unknown than invent.

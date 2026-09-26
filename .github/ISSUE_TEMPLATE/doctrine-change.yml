@@ -1,0 +1,81 @@
+name: Doctrine change
+description: Propose a change to the constitution, engineering doctrine or governance
+labels: ["doctrine"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        A doctrine change alters `spec.toml` outside the registry, increments
+        `spec_version`, and needs a rationale and a `CHANGELOG.md` entry.
+        Registry corrections do not belong here — use the registry form.
+
+  - type: dropdown
+    id: section
+    attributes:
+      label: Which section of spec.toml?
+      options:
+        - "[metis.identity] — mission or principles"
+        - "[metis.scope] — domains"
+        - "[metis.non_goals]"
+        - "[metis.safety] — the safety boundary"
+        - "[engineering] — engineering doctrine"
+        - "[governance] — governance and change classes"
+        - "[agent] or [agent.rules] — the agent contract"
+        - "[ratchet]"
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed change
+      description: The exact TOML you want, and what it replaces.
+      render: toml
+    validations:
+      required: true
+
+  - type: textarea
+    id: rationale
+    attributes:
+      label: Rationale
+      description: >-
+        What breaks, or fails to work, without this? "It would be cleaner" is
+        not a reason to change doctrine.
+    validations:
+      required: true
+
+  - type: textarea
+    id: impact
+    attributes:
+      label: Impact on member repositories
+      description: >-
+        Which of the six repositories does this change the requirements of, and
+        do any of them currently violate it? If so, name the discrepancy that
+        records the violation.
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: confirmations
+    attributes:
+      label: Confirmations
+      options:
+        - label: >-
+            This does not add a repository, a domain or a requirement to make a
+            document look complete.
+        - label: >-
+            Any change to an existing observation is expressed as a discrepancy,
+            not as an edit to the observation.
+        - label: >-
+            `python3 scripts/validate.py --strict` has been run and its output is
+            included below.
+    validations:
+      required: true
+
+  - type: textarea
+    id: validation
+    attributes:
+      label: Validation output
+      render: shell
+    validations:
+      required: true

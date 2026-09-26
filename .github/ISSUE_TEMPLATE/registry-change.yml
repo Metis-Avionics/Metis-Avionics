@@ -1,0 +1,76 @@
+name: Registry change
+description: Correct or extend the machine-readable registry in spec.toml
+labels: ["registry"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        The registry is an **observation**, not an intention. A change here must
+        be something you checked, with evidence. See
+        [docs/governance.md](https://github.com/Metis-Avionics/Metis-Avionics/blob/main/docs/governance.md).
+
+  - type: dropdown
+    id: change_type
+    attributes:
+      label: What kind of change is this?
+      options:
+        - Correct a field that is now wrong
+        - Add a repository to the organisation
+        - Add a related repository outside the organisation
+        - Add or correct a published package
+        - Record an excluded repository
+    validations:
+      required: true
+
+  - type: input
+    id: target
+    attributes:
+      label: Repository or package
+      description: >-
+        For a package, give the crates.io name. For a repository, give the
+        full owner/name exactly as GitHub reports it.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: evidence_kind
+    attributes:
+      label: How did you verify this?
+      options:
+        - gh api / gh repo view output
+        - A file and line in a repository
+        - The crates.io API
+        - An explicit statement from a human
+    validations:
+      required: true
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      description: >-
+        Paste the command output, or the file and line. An observation without
+        evidence is rejected by check C11 and, more importantly, is worthless.
+      render: shell
+    validations:
+      required: true
+
+  - type: textarea
+    id: discrepancy
+    attributes:
+      label: Does this contradict an existing observation or intention?
+      description: >-
+        If yes, this is a discrepancy, not an edit. Name the discrepancy id, or
+        say "new" and describe the mismatch.
+    validations:
+      required: true
+
+  - type: textarea
+    id: validation
+    attributes:
+      label: Validation you ran
+      description: >-
+        Paste the output of `python3 scripts/validate.py` before and after.
+      render: shell
+    validations:
+      required: true

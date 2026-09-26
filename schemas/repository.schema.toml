@@ -1,0 +1,188 @@
+# Schema for the organisation registry in spec.toml.
+#
+# This file is LOAD-BEARING: scripts/validate.py reads it and enforces it.
+# Adding a field here without adding it to every registry entry will fail
+# validation. Adding a field to spec.toml without adding it here will not be
+# checked, so extend both together.
+#
+# Conventions:
+#   "required"  — key must be present
+#   "type"      — str | bool | int | list
+#   "enum"      — key must be one of these values
+#   "pattern"   — key must match this regular expression
+#   "one_of"    — for empty-by-design keys such as spec_file = ""
+
+schema_version = "0.1.0"
+applies_to = "spec.toml"
+target = "repositories"
+
+# ── spec.toml document shape ─────────────────────────────────────────────────
+
+[document]
+required_top_level = [
+    "metis",
+    "repositories",
+    "engineering",
+    "governance",
+    "agent",
+    "state",
+    "ratchet",
+]
+required_top_level_keys = ["spec_version", "authority", "kind", "is_product"]
+
+[document.tables]
+
+[document.tables.metis]
+required = ["name", "slug", "repository", "identity", "scope", "non_goals", "safety"]
+
+[document.tables.repositories]
+required = [
+    "source_of_truth",
+    "registry_is",
+    "observations_are_not_intentions",
+    "policy",
+    "conventions",
+    "observed",
+    "registry",
+    "related",
+    "publications",
+    "excluded",
+]
+
+[document.tables.repositories.observed]
+required = ["observed_at", "observed_via", "entry_count", "stale_after_days"]
+
+[document.tables.engineering]
+required = ["spec_first", "deterministic", "reproducible", "test_first", "rust", "quality_gates"]
+
+[document.tables.governance]
+required = ["change_classes", "repository_requirements", "dependencies"]
+
+[document.tables.agent]
+required = ["mode", "rules", "execution_model", "final_report"]
+
+[document.tables.agent.rules]
+required = [
+    "read_spec_first",
+    "inspect_before_modify",
+    "no_requirement_invention",
+    "no_scope_expansion",
+    "no_repository_invention",
+    "no_observation_editing",
+    "validate_before_completion",
+    "never_hide_failures",
+    "never_claim_unvalidated_state",
+    "update_state_after_execution",
+    "record_discrepancies_explicitly",
+    "respect_safety_boundary",
+]
+# Every key here must also be mentioned by name in AGENTS.md (check C9).
+must_be_documented_in = "AGENTS.md"
+
+[document.tables.state]
+required = [
+    "authoritative_spec",
+    "living_state",
+    "session_state",
+    "handover_state",
+    "history",
+    "registry_schema",
+    "validator",
+]
+
+[document.tables.ratchet]
+required = [
+    "enabled",
+    "adoption",
+    "scope_expansion",
+    "completed_work_reopens",
+    "remaining_work_only_decreases",
+    "observations_never_edited_to_match_intent",
+]
+
+# ── Per-entry shapes ─────────────────────────────────────────────────────────
+
+[entry]
+kind = "registry"
+required = [
+    "name",
+    "full_name",
+    "role",
+    "purpose",
+    "language",
+    "default_branch",
+    "visibility",
+    "archived",
+    "pushed_at",
+    "local_clone",
+    "crate_count",
+    "github_license",
+    "declared_license",
+    "spec_file",
+    "spec_file_conforms",
+    "living_file",
+    "ci",
+    "consumes",
+    "consumes_git",
+]
+types = { "name" = "str", "archived" = "bool", "crate_count" = "int", "spec_file_conforms" = "bool", "consumes" = "list", "consumes_git" = "list" }
+patterns = { "name" = "^[A-Za-z0-9._-]+$", "default_branch" = "^[A-Za-z0-9._/-]+$" }
+enums = { "visibility" = ["public", "private", "internal"], "ci" = ["github_actions", "external", "none"], "language" = ["rust", "python", "python+rust"] }
+
+[entry_consumes]
+kind = "inline_table"
+required = ["package", "version", "source", "resolved_in_lock"]
+enums = { "source" = ["crates_io", "git", "path"] }
+
+[entry_consumes_git]
+kind = "inline_table"
+required = ["repository", "rev", "packages", "source"]
+patterns = { "rev" = "^[0-9a-f]{7,40}$" }
+# Every `repository` here must exist in repositories.related or .registry.
+repository_must_resolve = true
+
+[related_entry]
+kind = "related"
+required = [
+    "name",
+    "full_name",
+    "in_org",
+    "relationship",
+    "direction",
+    "asserted_by",
+    "relationship_confidence",
+    "note",
+]
+enums = { "in_org" = [false], "relationship" = ["fork_source", "downstream_consumer", "heritage_source", "sibling_org"], "direction" = ["consumed_by_org", "consumes_from_org", "inherits_from_org"], "relationship_confidence" = ["asserted_by_consumer", "verified"] }
+
+[publication]
+kind = "publications"
+required = ["max_version", "version_count", "owner_repo"]
+patterns = { "max_version" = "^[0-9]+\\.[0-9]+\\.[0-9]+$", "owner_repo" = "^Metis-Avionics/.+$" }
+# Keys in [repositories.publications] that are metadata, not package records.
+metadata_keys = ["observed_at", "source", "note", "unpublished"]
+# Every crates_io dependency in a registry entry must appear here (check C6).
+must_cover_crates_io_dependencies = true
+
+# ── Living-state shape ───────────────────────────────────────────────────────
+
+[living]
+applies_to = "living.toml"
+required_top_level = ["handover", "discrepancies"]
+
+[living.handover]
+required = ["status", "phase", "last_updated", "summary", "next_action", "remaining"]
+
+[living.discrepancies]
+required = ["id", "severity", "title", "observed_in", "evidence", "status", "resolution_owner", "resolution"]
+optional = ["check", "waiver_key"]
+enums = { "severity" = ["low", "medium", "high", "critical"], "status" = ["open", "accepted", "resolved"] }
+# "accepted" discrepancies may downgrade the check named in their `check` field
+# from error to warning. In --strict mode they remain errors.
+#
+# A waiver applies to the WHOLE check, which is too coarse: one accepted gap
+# would otherwise mask every other finding of the same check. `waiver_key` narrows
+# the waiver to findings whose message contains that substring. Always set it
+# when a check can produce findings this discrepancy does not cover.
+accepted_may_downgrade = true
+waiver_key_is_substring_of_message = true

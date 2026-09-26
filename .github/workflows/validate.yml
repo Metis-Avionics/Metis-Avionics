@@ -1,0 +1,101 @@
+name: validate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: validate-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  constitution:
+    name: spec, state and documentation agree
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+
+      - name: Check the interpreter can parse TOML
+        run: python3 -c "import tomllib, sys; print(sys.version)"
+
+      # Enforces org-level internal consistency. Accepted discrepancies downgrade
+      # their named check to a warning; --strict re-raises every one of them, so
+      # the debt this repository has chosen to tolerate stays visible.
+      - name: Validate
+        run: python3 scripts/validate.py
+
+      - name: Report the full debt picture
+        if: always()
+        run: python3 scripts/validate.py --strict || true
+
+      - name: Registry freshness
+        # Offline by design: reads observed_at, never the network. Re-observation
+        # is a human action via scripts/observe_registry.py.
+        run: python3 scripts/observe_registry.py --stale
+
+      - name: List the invariants under test
+        run: python3 scripts/validate.py --list
+
+  gates:
+    name: lint, format and types
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+
+      # This action publishes patch tags but no floating major tag, so it is
+      # pinned to the exact release. Verified against the API, not assumed: the
+      # first run of this job failed on `setup-uv@v10` for exactly that reason.
+      - uses: astral-sh/setup-uv@v10.2.0
+        with:
+          # The lockfile is the pin. Installing without it would resolve
+          # whatever the registry offers today, which is not a check.
+          enable-cache: true
+
+      - name: Install the pinned toolchain
+        run: uv sync --frozen --group dev
+
+      # The organisation demands pinned, versioned, automated gates from its
+      # members. It holds itself to the same three.
+      - name: Lint
+        run: uv run ruff check scripts/
+
+      - name: Format
+        run: uv run ruff format --check scripts/
+
+      - name: Types
+        run: uv run mypy
+
+  hygiene:
+    name: no committed build artefacts
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+      - name: Fail on tracked bytecode, scratch plans or editor state
+        run: |
+          offenders=$(git ls-files | grep -E '(__pycache__|\.pyc$|^\.kilo/|^\.DS_Store$|^\.venv/)' || true)
+          if [ -n "$offenders" ]; then
+            echo "::error::tracked build artefacts or scratch state:"
+            echo "$offenders"
+            exit 1
+          fi
+          echo "no tracked build artefacts"
+      - name: The lockfile must be committed
+        # A lockfile that is not committed is a toolchain that silently drifts.
+        run: |
+          if ! git ls-files --error-unmatch uv.lock >/dev/null 2>&1; then
+            echo "::error::uv.lock is not tracked. Run 'uv lock' and commit it."
+            exit 1
+          fi
+          echo "uv.lock is tracked"
